@@ -1,0 +1,17 @@
+# Python compiled files
+*.pyc
+
+# Idea files
+.idea/
+
+# venv folder
+venv
+
+# some logs
+*.log
+
+# screenshots
+*.png
+
+# cache
+.pytest_cache/
