@@ -1,2 +1,5 @@
 pytest
-pytest-webdriver
+Pillow
+pyscreenshot
+python-libxdo
+ImageChops

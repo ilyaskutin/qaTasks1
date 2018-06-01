@@ -1,15 +1,14 @@
 import pytest
-
+from PIL import Image
+import os
 
 @pytest.fixture
-def driver(webdriver):
+def logo():
     """
     Фикстура подготавливает драйвер к работе
     :return: webdriver
     """
-    webdriver.get(pytest.url)
-    webdriver.implicitly_wait(pytest.timeout)
-    return webdriver
+    return Image.open('{}/yandex_autotests/.resources/logo.png'.format(os.getcwd()))
 
 
 def pytest_namespace():

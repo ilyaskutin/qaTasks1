@@ -10,7 +10,7 @@ def parse_ps():
     proc1 = subprocess.Popen(['ps', 'cax'],
                              stdout=subprocess.PIPE)
 
-    proc2 = subprocess.Popen(['grep', 'chromedriver'],
+    proc2 = subprocess.Popen(['grep', 'chromium-browse'],
                              stdin=proc1.stdout,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
@@ -36,7 +36,7 @@ def run_driver():
     """
     Просто запускает драйвер
     """
-    subprocess.Popen(['{}/chromedriver'.format(os.getcwd())],
+    subprocess.Popen(["chromium-browser --incognito --new-window yandex.ru"],
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT,
                      shell=True)
