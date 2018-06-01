@@ -2,4 +2,4 @@ pytest
 Pillow
 pyscreenshot
 python-libxdo
-ImageChops
+pynput

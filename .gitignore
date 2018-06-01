@@ -10,8 +10,6 @@ venv
 # some logs
 *.log
 
-# screenshots
-*.png
-
 # cache
 .pytest_cache/
+__pycache__
