@@ -2,6 +2,8 @@ import pytest
 from PIL import Image
 import os
 
+RESOURCE_DIR = "{}/yandex_autotests/.resources".format(os.getcwd())
+
 @pytest.fixture
 def logo():
     """
@@ -14,7 +16,8 @@ def logo():
 def pytest_namespace():
     return {
         #Константы
-        'timeout' : 20,                           # таймаут для вебдрайвера, сколько секунд ждать загрузки эл-та
+        'start_timeout': 10,                      # таймаут для браузера, сколько ждать на старте
+        'between_page_timeout': 5,                # таймаут при переходе между страницами
         'url': 'http://www.yandex.ru',            # url сайта которые проверям
         'username': 'arrival18',                  # логин тестового пользователя
         'password': 'QWEqwe123',                  # пароль тестового пользователя
@@ -23,10 +26,10 @@ def pytest_namespace():
         'check_title': 'Яндекс',                  # заголовок сайта, который ожидаем после
 
         # Ресурсы
-        'logo': '{}/yandex_autotests/.resources/logo.png'.format(os.getcwd()),
-        'mail': '{}/yandex_autotests/.resources/mail.png'.format(os.getcwd()),
-        'logo_auth': '{}/yandex_autotests/.resources/logo_auth.png'.format(os.getcwd()),
-        'login_button': '{}/yandex_autotests/.resources/login.png'.format(os.getcwd()),
+        'logo': os.path.join(RESOURCE_DIR, 'logo.png'),
+        'mail': os.path.join(RESOURCE_DIR, 'mail.png'),
+        'logo_auth': os.path.join(RESOURCE_DIR, 'logo_auth.png'),
+        'login_button': os.path.join(RESOURCE_DIR, 'login.png'),
 
         # Арены
         "main_logo_area": (

@@ -29,6 +29,7 @@ def get_areas(area_map):
 
     xdo = Xdo()
     size = xdo.get_window_size(xdo.get_active_window())
+    locations = xdo.get_window_location(xdo.get_active_window())
     wnd_w = int(size.width / len(area_map[0]))
     wnd_h = int(size.height / len(area_map))
     result = []
@@ -37,7 +38,10 @@ def get_areas(area_map):
         for cell_n in range(len(area_map[row_n])):
             if area_map[row_n][cell_n] == 1:
                 result.append(
-                    (wnd_w * cell_n, wnd_h * row_n, wnd_w * cell_n + wnd_w, wnd_h * row_n + wnd_h)
+                    (wnd_w * cell_n + locations.x,
+                     wnd_h * row_n + locations.y,
+                     wnd_w * cell_n + wnd_w + locations.x,
+                     wnd_h * row_n + wnd_h + locations.y)
                 )
     return result
 
@@ -47,7 +51,7 @@ if __name__ == '__main__':
     # unittest.main()
 
     print(get_areas((
-        [0, 1, 1],
-        [0, 1, 1],
+        [0, 0, 1],
+        [0, 0, 0],
         [0, 0, 0],
     )))

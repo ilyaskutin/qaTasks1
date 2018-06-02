@@ -2,81 +2,84 @@ import time
 
 import pytest
 
-from desktop import get_areas, Area
-from iodev import move_cursor, click, enter_text, press_tab, press_space
-from ocr import FindImage
-from utils import is_driver, run_driver, kill_driver
+from desktop import get_areas
+from iodev import Mouse, Keyboard
+from ocr import OCR
+from utils import Browser
 
 
-def setup_module(self):
-    """
-    Подготовка тестового окружения. Запуск броузера если он не запущен.
-    """
-    if not is_driver():
-        run_driver()
-    time.sleep(10)
-
-def teardown_module(self):
-    """"
-    Остановка тестового окружения. Остановка вебдрайвера.
-    """
-    kill_driver()
-
-
-class TestOpenWebsite:
+class Base:
     def setup_class(self):
-        self.ocr = FindImage()
+        """
+        Подготовка тестового окружения. Запуск броузера если он не запущен.
+        """
+        browser = Browser()
+        browser.browser_run(pytest.url, timeout=pytest.start_timeout)
+        time.sleep(pytest.start_timeout)
 
-    '''
+        self.ocr = OCR()
+        self.mouse = Mouse()
+        self.keyboard = Keyboard()
+
+    def teardown_class(self):
+        """"
+        Остановка тестового окружения. Закрытие браузера.
+        """
+        self.keyboard.press_button('alt+f4')
+
+    def find_image(self, image_path, areas, convert='1'):
+        for a in areas:
+            result = self.ocr.find_image_on_screen(image_path, area=a, convert=convert)
+            if result:
+                return result
+        return False
+
+
+class TestOpenWebsite(Base):
+
     def test_login(self):
         """
         Первый тест. Проверяет, что по адресу yandex.ru открывается фактически данный сайт.
-        :param driver: webdriver
         """
         login_area = get_areas(pytest.main_logo_area)
         result = self.find_image(pytest.logo, login_area, convert="1")
 
-        assert result[0], True
-    '''
+        assert result, True
 
+
+class TestAuthentication(Base):
     def test_email(self):
         """
-        Второй тест. Проверяет, что по адресу yandex.ru открывается фактически данный сайт.
-        :param driver: webdriver
+        Второй тест. Позитивная авторизация, тестовым пользователем, на сайте yandex.ru
         """
-        mail_area = get_areas(pytest.mail_area)
-        result = self.find_image(pytest.mail, mail_area, convert="L")
-        if result[0]:
-            self.authentication((result[1], result[2]))
+        #  Ищу кнопку "Войти в почту"
+        result = self.find_image(pytest.mail,                  # Изображение кнопки
+                                 get_areas(pytest.mail_area),  # Участки экрана в которых буду искать
+                                 convert="L")
+        # Если кнопка "Войти в почту" нашлась, пытаюсь авторизоваться
+        if result:
+            self.authentication((result.x, result.y))  # Запуск аутентификации
 
-        assert result[0], True
+        assert result, True
 
     def authentication(self, location):
-        move_cursor(location)
-        click()
-        time.sleep(5)
+        self.mouse.move(location)
+        self.mouse.click()
+        time.sleep(pytest.between_page_timeout)
 
         auth_logo_area = get_areas(pytest.auth_logo_area)
         #result = self.find_image(pytest.logo_auth, auth_logo_area, convert="1")
         #if result[0]:
         #move_cursor((result[1], result[2] + 150))
-        enter_text(pytest.username)
-        press_tab()
-        enter_text(pytest.password)
-        press_tab()
-        press_tab()
-        press_space()
+        self.keyboard.enter_text(pytest.username)
+        self.keyboard.press_button('tab')
+        self.keyboard.enter_text(pytest.password)
+        self.keyboard.press_button('tab')
+        self.keyboard.press_button('tab')
+        self.keyboard.press_button('space')
         #else:
         #    assert result[0], True
-        time.sleep(5)
-
-    def find_image(self, image_path, areas, convert='1'):
-        result = (False, 0, 0)
-        for a in areas:
-            result = self.ocr.find_image_on_screen(image_path, area=a, convert=convert)
-            if result[0]:
-                return result
-        return result
+        time.sleep(pytest.between_page_timeout)
 
 
 
