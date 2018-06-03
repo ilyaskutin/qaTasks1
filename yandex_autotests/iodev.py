@@ -48,9 +48,3 @@ class Keyboard:
         for k in keys:
             if k in dir(Key):
                 self.keyboard.release(Key[k])
-
-
-def press_space():
-    keyboard = Controller()
-    keyboard.press(Key.space)
-    keyboard.release(Key.space)

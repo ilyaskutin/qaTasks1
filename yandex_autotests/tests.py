@@ -17,7 +17,9 @@ class Base:
         browser.browser_run(pytest.url, timeout=pytest.start_timeout)
         time.sleep(pytest.start_timeout)
 
-        self.ocr = OCR()
+        self.ocr = OCR(pytest.path_to_res,
+                       search_accuracy=pytest.search_accuracy,
+                       debug=pytest.debug_mode)
         self.mouse = Mouse()
         self.keyboard = Keyboard()
 
@@ -32,18 +34,20 @@ class Base:
             result = self.ocr.find_image_on_screen(image_path, area=a, convert=convert)
             if result:
                 return result
+            if pytest.debug_mode:
+                print("В блоке с координатами {}, {}."
+                      "Изображение не найдено, самый близкий фрагмент "
+                      "с различиями {} rms".format(a[0], a[1], result.rms))
         return False
 
 
 class TestOpenWebsite(Base):
-
     def test_login(self):
         """
         Первый тест. Проверяет, что по адресу yandex.ru открывается фактически данный сайт.
         """
         login_area = get_areas(pytest.main_logo_area)
-        result = self.find_image(pytest.logo, login_area, convert="1")
-
+        result = self.find_image(pytest.logo, login_area, convert="L")
         assert result, True
 
 
@@ -56,30 +60,33 @@ class TestAuthentication(Base):
         result = self.find_image(pytest.mail,                  # Изображение кнопки
                                  get_areas(pytest.mail_area),  # Участки экрана в которых буду искать
                                  convert="L")
-        # Если кнопка "Войти в почту" нашлась, пытаюсь авторизоваться
-        if result:
-            self.authentication((result.x, result.y))  # Запуск аутентификации
+        # Если кнопка "Войти в почту" не нашлась это ошибка
+        if not result:
+            assert result, True
 
-        assert result, True
-
-    def authentication(self, location):
-        self.mouse.move(location)
+        self.mouse.move((result.x, result.y))
         self.mouse.click()
         time.sleep(pytest.between_page_timeout)
 
-        auth_logo_area = get_areas(pytest.auth_logo_area)
-        #result = self.find_image(pytest.logo_auth, auth_logo_area, convert="1")
-        #if result[0]:
-        #move_cursor((result[1], result[2] + 150))
+        result = self.find_image(pytest.logo_auth,
+                                 get_areas(pytest.auth_area),
+                                 convert="L")
+        if not result:
+            assert result, True
+
         self.keyboard.enter_text(pytest.username)
         self.keyboard.press_button('tab')
         self.keyboard.enter_text(pytest.password)
         self.keyboard.press_button('tab')
         self.keyboard.press_button('tab')
         self.keyboard.press_button('space')
-        #else:
-        #    assert result[0], True
         time.sleep(pytest.between_page_timeout)
+
+        result = self.find_image(pytest.user_login,
+                                 get_areas(pytest.user_login_area),
+                                 convert="L")
+
+        assert result, True
 
 
 

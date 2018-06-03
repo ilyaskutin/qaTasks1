@@ -12,17 +12,20 @@ from multiprocessing import cpu_count
 
 from desktop import Area
 
-DEBUG = True
-
 
 class OCR:
-    def __init__(self, path_to_resource=os.getcwd(), search_accuracy=8):
+    def __init__(self, path_to_resource, search_accuracy=8, debug=True):
         self.screen = None
         self.image = None
         self.rms = []
 
         self.resources = path_to_resource
         self.search_accuracy = search_accuracy
+        self.debug = debug
+
+        if self.debug:
+            if not os.path.exists(os.path.join(self.resources, 'debug')):
+                os.mkdir(os.path.join(self.resources, 'debug'))
 
     def find_image_on_screen(self, path_to_etalon, screen=None, area=None, convert="1"):
         if not area:
@@ -34,16 +37,23 @@ class OCR:
 
         self.__preparation_img(path_to_etalon, screen, convert=convert)
 
-        if DEBUG:
-            self.screen.save('{}/debug/screen.png'.format(self.resources))
+        if self.debug:
+            name = 'screen.png'
+            scr_nmb = 1
+            while os.path.exists(os.path.join(self.resources, 'debug/{}'.format(name))):
+                name = 'screen_{}.png'.format(scr_nmb)
+                scr_nmb += 1
+            self.screen.save(os.path.join(self.resources, 'debug/{}'.format(name)))
 
         for lines_pack in self.__lines_pack_for_found(self.__lines_for_found()):
             results = self.finding(lines_pack)
             for result in results:
                 if result[0]:
-                    return Result((result[0], \
-                                   result[1] + area.x1 + int(self.image.width / 2), \
-                                   result[2] + area.y1 + int(self.image.height / 2)))
+                    return Result(
+                        (result[0],
+                         result[1] + area.x1 + int(self.image.width / 2),
+                         result[2] + area.y1 + int(self.image.height / 2))
+                    )
                 else:
                     self.rms.append(result[1])
 
@@ -56,13 +66,13 @@ class OCR:
         pool.join()
         return results
 
-    def is_equal(self, im1, im2, diff=8):
+    def is_equal(self, im1, im2):
         h = ImageChops.difference(im1, im2).histogram()
         sq = (value * ((idx % 256) ** 2) for idx, value in enumerate(h))
         sum_of_squares = sum(sq)
         rms = math.sqrt(sum_of_squares / float(im1.size[0] * im2.size[1]))
         self.rms.append(rms)
-        if rms < diff:
+        if rms < self.search_accuracy:
             return True
         else:
             return False
@@ -76,8 +86,8 @@ class OCR:
             self.screen = self.screen.filter(ImageFilter.DETAIL)
             self.image = self.image.filter(ImageFilter.DETAIL)
         else:
-            self.screen = screen
-            self.image = Image.open(path_to_etalon)
+            self.screen = screen.convert('RGBA')
+            self.image = Image.open(path_to_etalon).convert('RGBA')
 
     def __lines_for_found(self):
         display_rows = range(self.screen.height - self.image.height)
@@ -106,13 +116,13 @@ class OCR:
                 if self.is_equal(self.screen.crop(
                         box=(_x, line, _x + self.image.width, line + self.image.height)),
                         self.image):
-                    if DEBUG:
+                    if self.debug:
                         self.screen.crop(box=(_x,
                                               line,
                                               _x + self.image.width,
                                               line + self.image.height)).save(
-                            '{}/debug/true.png'.format(self.resources))
-                        self.image.save('{}/debug/equal.png'.format(self.resources))
+                            os.path.join(self.resources, 'debug/found.png'))
+                        self.image.save(os.path.join(self.resources, 'debug/equal.png'))
                     return True, _x, line
         return False, min(self.rms)
 
