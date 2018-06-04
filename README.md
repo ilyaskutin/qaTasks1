@@ -20,6 +20,5 @@
 * Установить необходимые пакеты с помощью команды ```sudo apt-get install $(cat ./debian_requirements.txt)```
 * Создать виртуальное окружение с помощью команды  ```virtualenv venv -p python3```
 * Установить python пакеты с помощью команды ```./venv/bin/pip install -r  python_requirements.txt```
-* Добавить переменную окружения с помощью команды ```export SELENIUM_URI=http://localhost:9515```
 * Для запуска тестов использовать команду ```./venv/bin/python3 -m pytest -q ./yandex_autotests/tests.py```
 
