@@ -24,6 +24,7 @@ class Area:
 
 
 def get_areas(area_map):
+    """Возвращает координаты квадрата для заданой сетки"""
     if len(area_map) == 0:
         return 0, 0, 0, 0
 
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     # unittest.main()
 
     print(get_areas((
-        [0, 0, 1],
-        [0, 0, 0],
+        [1, 0, 0],
+        [1, 0, 0],
         [0, 0, 0],
     )))

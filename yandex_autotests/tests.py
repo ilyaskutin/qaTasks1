@@ -30,6 +30,7 @@ class Base:
         self.keyboard.press_button('alt+f4')
 
     def find_image(self, image_path, areas, convert='1'):
+        result = False
         for a in areas:
             result = self.ocr.find_image_on_screen(image_path, area=a, convert=convert)
             if result:
@@ -38,7 +39,9 @@ class Base:
                 print("В блоке с координатами {}, {}."
                       "Изображение не найдено, самый близкий фрагмент "
                       "с различиями {} rms".format(a[0], a[1], result.rms))
-        return False
+        if not result and pytest.repeat_search:
+            result = self.ocr.find_image_on_screen(image_path, convert=convert)
+        return result
 
 
 class TestOpenWebsite(Base):
@@ -57,7 +60,7 @@ class TestAuthentication(Base):
         Второй тест. Позитивная авторизация, тестовым пользователем, на сайте yandex.ru
         """
         #  Ищу кнопку "Войти в почту"
-        result = self.find_image(pytest.mail,                  # Изображение кнопки
+        result = self.find_image(pytest.mail,  # Изображение кнопки
                                  get_areas(pytest.mail_area),  # Участки экрана в которых буду искать
                                  convert="L")
         # Если кнопка "Войти в почту" не нашлась это ошибка
@@ -87,8 +90,3 @@ class TestAuthentication(Base):
                                  convert="L")
 
         assert result, True
-
-
-
-
-

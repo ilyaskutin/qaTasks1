@@ -17,6 +17,7 @@ def pytest_namespace():
         'check_url': 'https://www.yandex.ru/',    # url сайта, который ожидаем после загрузки
         'check_title': 'Яндекс',                  # заголовок сайта, который ожидаем после
         'debug_mode': False,                       # debug
+        'repeat_search': True,                    # Если не найдет в арене, повторит по всему экрану
         'path_to_res': RESOURCE_DIR,
 
         # Ресурсы
@@ -29,7 +30,7 @@ def pytest_namespace():
         # Арены
         "main_logo_area": (
             [0, 0, 0],
-            [1, 1, 0],
+            [1, 0, 0],
             [0, 0, 0]
         ),
 
